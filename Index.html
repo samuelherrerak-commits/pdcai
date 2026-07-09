@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Cobranzas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- CDN en orden correcto: Supabase → SheetJS → Lucide → app.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+
+    <!-- ===================== LOADER GLOBAL ===================== -->
+    <div id="global-loader" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; display:none; flex-direction:column; justify-content:center; align-items:center; backdrop-filter: blur(10px);">
+        <i data-lucide="loader-2" style="color:#22c55e; width:48px; height:48px; animation: spin 1s linear infinite;"></i>
+        <p id="loader-text" style="color:white; margin-top:15px; font-family:monospace; letter-spacing: 2px;">SINCRONIZANDO CON LA NUBE...</p>
+    </div>
+    <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+
+    <div class="app-container">
+
+        <!-- ===================== NAVBAR ===================== -->
+        <nav class="navbar">
+            <div class="nav-inner liquid-glass">
+                <div class="nav-brand">
+                    <i data-lucide="globe"></i> Cobranzas Prosein (Cloud)
+                </div>
+                <div id="nav-actions">
+                    <button id="btn-logout" class="btn-outline hidden"><i data-lucide="log-out"></i> Cerrar Sesión</button>
+                    <span id="nav-status" class="btn-outline" style="pointer-events: none;">Portal de Cobranzas</span>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+
+            <!-- ===================== LOGIN ===================== -->
+            <section id="login-section" class="panel">
+                <h1 class="title font-serif">Acceso al Portal</h1>
+                <form id="login-form">
+                    <div class="input-group liquid-glass">
+                        <input type="text" id="login-username" placeholder="RIF Legal (Ej: J-12345678-9)" required>
+                    </div>
+                    <div class="input-group liquid-glass">
+                        <input type="password" id="login-password" placeholder="Contraseña" required>
+                        <button type="submit" class="btn-icon"><i data-lucide="arrow-right"></i></button>
+                    </div>
+                    <p id="login-error" class="error-msg hidden">Credenciales inválidas.</p>
+                </form>
+                <p style="text-align:center; font-size:14px; margin-top:15px; color:rgba(255,255,255,0.4);">
+                    Use su RIF como usuario y contraseña
+                </p>
+            </section>
+
+
+
+            <!-- ===================== PANEL ADMINISTRADOR ===================== -->
+            <section id="admin-panel" class="panel hidden">
+
+                <!-- Tabs admin -->
+                <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+                    <button class="btn-outline liquid-glass tab-admin active" onclick="switchAdminTab('dashboard')">
+                        <i data-lucide="layout-dashboard"></i> Dashboard
+                    </button>
+                    <button class="btn-outline liquid-glass tab-admin" onclick="switchAdminTab('alertas')">
+                        <i data-lucide="bell"></i> Alertas
+                        <span id="badge-venc" style="background:#ef4444;color:black;border-radius:50%;padding:1px 6px;font-size:11px;margin-left:4px;"></span>
+                    </button>
+                    <button class="btn-outline liquid-glass tab-admin" onclick="switchAdminTab('buscador')">
+                        <i data-lucide="search"></i> Clientes
+                    </button>
+                    <button class="btn-outline liquid-glass tab-admin" onclick="switchAdminTab('pagos')">
+                        <i data-lucide="wallet"></i> Pagos
+                    </button>
+                    <button class="btn-outline liquid-glass tab-admin" onclick="switchAdminTab('cartera')">
+                        <i data-lucide="upload-cloud"></i> Cartera
+                    </button>
+                    <button class="btn-outline liquid-glass tab-admin" onclick="switchAdminTab('usuarios')">
+                        <i data-lucide="users"></i> Usuarios
+                    </button>
+                    <button class="btn-outline liquid-glass tab-admin" onclick="switchAdminTab('retenciones-admin')">
+                        <i data-lucide="shield"></i> Retenciones
+                    </button>
+
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════
+                     TAB 1: DASHBOARD PRINCIPAL
+                ════════════════════════════════════════════════════ -->
+                <div id="admin-tab-dashboard" class="admin-tab-content" style="width:100%;">
+
+                    <!-- KPI Cards -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:15px;margin-bottom:20px;">
+                        <div class="card liquid-glass" style="text-align:center;padding:20px 15px;">
+                            <i data-lucide="credit-card" style="width:24px;height:24px;color:#ef4444;margin:0 auto 8px;"></i>
+                            <span style="font-size:11px;color:rgba(255,255,255,0.5);display:block;text-transform:uppercase;letter-spacing:1px;">Cartera Pendiente</span>
+                            <strong id="kpi-cartera" class="font-serif" style="font-size:24px;color:#ef4444;">$0.00</strong>
+                        </div>
+                        <div class="card liquid-glass" style="text-align:center;padding:20px 15px;">
+                            <i data-lucide="file-text" style="width:24px;height:24px;color:#3b82f6;margin:0 auto 8px;"></i>
+                            <span style="font-size:11px;color:rgba(255,255,255,0.5);display:block;text-transform:uppercase;letter-spacing:1px;">Facturas Pendientes</span>
+                            <strong id="kpi-facturas" class="font-serif" style="font-size:28px;color:#3b82f6;">0</strong>
+                        </div>
+                        <div class="card liquid-glass" style="text-align:center;padding:20px 15px;">
+                            <i data-lucide="alert-triangle" style="width:24px;height:24px;color:#eab308;margin:0 auto 8px;"></i>
+                            <span style="font-size:11px;color:rgba(255,255,255,0.5);display:block;text-transform:uppercase;letter-spacing:1px;">Facturas Vencidas</span>
+                            <strong id="kpi-vencidas" class="font-serif" style="font-size:28px;color:#eab308;">0</strong>
+                        </div>
+                        <div class="card liquid-glass" style="text-align:center;padding:20px 15px;">
+                            <i data-lucide="clock" style="width:24px;height:24px;color:#c084fc;margin:0 auto 8px;"></i>
+                            <span style="font-size:11px;color:rgba(255,255,255,0.5);display:block;text-transform:uppercase;letter-spacing:1px;">Pagos por Revisar</span>
+                            <strong id="kpi-rev" class="font-serif" style="font-size:28px;color:#c084fc;">0</strong>
+                        </div>
+                        <div class="card liquid-glass" style="text-align:center;padding:20px 15px;">
+                            <i data-lucide="trending-up" style="width:24px;height:24px;color:#22c55e;margin:0 auto 8px;"></i>
+                            <span style="font-size:11px;color:rgba(255,255,255,0.5);display:block;text-transform:uppercase;letter-spacing:1px;">Cobrado Este Mes</span>
+                            <strong id="kpi-cobrado" class="font-serif" style="font-size:24px;color:#22c55e;">$0.00</strong>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos -->
+                    <div style="display:grid;grid-template-columns:1fr 2fr;gap:15px;margin-bottom:20px;">
+                        <!-- Dona -->
+                        <div class="card liquid-glass" style="padding:20px;">
+                            <h4 style="margin:0 0 15px;font-size:13px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Estado de Cartera</h4>
+                            <div style="position:relative;height:200px;">
+                                <canvas id="chart-dona"></canvas>
+                            </div>
+                        </div>
+                        <!-- Barras mensuales -->
+                        <div class="card liquid-glass" style="padding:20px;">
+                            <h4 style="margin:0 0 15px;font-size:13px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Cobranza Mensual</h4>
+                            <div style="position:relative;height:200px;">
+                                <canvas id="chart-barras"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top 5 deudores -->
+                    <div class="card liquid-glass" style="margin-bottom:20px;padding:20px;">
+                        <h4 style="margin:0 0 15px;font-size:13px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Top 5 Clientes por Deuda</h4>
+                        <div style="position:relative;height:180px;">
+                            <canvas id="chart-top5"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- KPIs secundarios (IDs legacy para compatibilidad) -->
+                    <div class="flex-row" style="gap:15px;">
+                        <div class="card liquid-glass col-40" style="text-align:center;">
+                            <h3 style="margin:0;color:rgba(255,255,255,0.5);font-size:13px;">Clientes Activos</h3>
+                            <p id="summary-clientes" class="font-serif" style="font-size:28px;margin:8px 0 0;">0</p>
+                        </div>
+                        <div class="card liquid-glass col-40" style="text-align:center;">
+                            <h3 style="margin:0;color:rgba(255,255,255,0.5);font-size:13px;">Recaudación Aprobada Total</h3>
+                            <p id="summary-recaudacion" class="font-serif text-green" style="font-size:28px;margin:8px 0 0;">$0.00</p>
+                        </div>
+                        <div class="card liquid-glass col-60" style="text-align:center;">
+                            <h3 style="margin:0;color:rgba(255,255,255,0.5);font-size:13px;">Saldo Total Pendiente</h3>
+                            <p id="summary-monto" class="font-serif" style="font-size:28px;margin:8px 0 0;color:#ef4444;">$0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════
+                     TAB 2: ALERTAS DE COBRANZA
+                ════════════════════════════════════════════════════ -->
+                <div id="admin-tab-alertas" class="admin-tab-content hidden" style="width:100%;">
+
+                    <!-- Vencidas -->
+                    <div class="card liquid-glass" style="margin-bottom:15px;border-color:#ef4444;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                            <i data-lucide="alert-circle" style="width:20px;height:20px;color:#ef4444;"></i>
+                            <h3 style="margin:0;color:#ef4444;font-size:15px;">FACTURAS VENCIDAS</h3>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Cliente (RIF)</th><th>Factura</th><th>Saldo</th><th>Días Vencida</th></tr></thead>
+                                <tbody id="alerts-vencidas-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Próximas a vencer -->
+                    <div class="card liquid-glass" style="margin-bottom:15px;border-color:#eab308;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                            <i data-lucide="clock" style="width:20px;height:20px;color:#eab308;"></i>
+                            <h3 style="margin:0;color:#eab308;font-size:15px;">PRÓXIMAS A VENCER (7 días)</h3>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Cliente (RIF)</th><th>Factura</th><th>Vencimiento</th><th>Saldo</th></tr></thead>
+                                <tbody id="alerts-proximas-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagos parciales -->
+                    <div class="card liquid-glass" style="border-color:#3b82f6;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                            <i data-lucide="git-branch" style="width:20px;height:20px;color:#3b82f6;"></i>
+                            <h3 style="margin:0;color:#3b82f6;font-size:15px;">PAGOS PARCIALES ACTIVOS</h3>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Cliente (RIF)</th><th>Factura</th><th>Abonado</th><th>Saldo Restante</th></tr></thead>
+                                <tbody id="alerts-parciales-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════
+                     TAB 3: BUSCADOR DE CLIENTES
+                ════════════════════════════════════════════════════ -->
+                <div id="admin-tab-buscador" class="admin-tab-content hidden" style="width:100%;">
+                    <div class="card liquid-glass" style="margin-bottom:15px;">
+                        <h3 style="margin:0 0 12px;font-size:15px;">Buscar Cliente por RIF</h3>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <div class="input-group liquid-glass" style="flex:1;margin-bottom:0;padding:10px 15px;border-radius:10px;">
+                                <input type="text" id="search-rif-input" placeholder="Ej: J-12345678  (Enter para buscar)" style="font-family:monospace;">
+                            </div>
+                            <button class="btn-solid" onclick="searchClients()"
+                                    style="width:auto;background:#3b82f6;color:black;padding:10px 20px;">
+                                <i data-lucide="search"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                    <div id="client-profile-wrap"></div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════
+                     TAB 4: GESTIÓN DE PAGOS
+                ════════════════════════════════════════════════════ -->
+                <div id="admin-tab-pagos" class="admin-tab-content hidden" style="width:100%;">
+                    <div class="card liquid-glass" style="margin-bottom:15px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+                            <h3 style="margin:0;font-size:15px;">Filtros</h3>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn-solid" onclick="filterPayments()"
+                                        style="width:auto;background:#3b82f6;color:black;padding:7px 14px;font-size:13px;">
+                                    <i data-lucide="filter"></i> Aplicar
+                                </button>
+                                <button class="btn-outline" onclick="clearPaymentFilters()"
+                                        style="width:auto;padding:7px 14px;font-size:13px;">
+                                    Limpiar
+                                </button>
+                                <button class="btn-outline" onclick="exportPaymentsExcel()"
+                                        id="btn-exportar"
+                                        style="width:auto;padding:7px 14px;font-size:13px;">
+                                    <i data-lucide="download"></i> Excel
+                                </button>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+                            <div class="input-group liquid-glass" style="margin-bottom:0;padding:8px 12px;border-radius:8px;">
+                                <input type="text" id="filtro-rif" placeholder="RIF cliente" style="font-size:13px;font-family:monospace;">
+                            </div>
+                            <div class="input-group liquid-glass" style="margin-bottom:0;padding:8px 12px;border-radius:8px;">
+                                <input type="text" id="filtro-factura" placeholder="N° Factura" style="font-size:13px;">
+                            </div>
+                            <div class="input-group liquid-glass" style="margin-bottom:0;padding:8px 12px;border-radius:8px;">
+                                <select id="filtro-status" style="background:transparent;color:white;border:none;width:100%;outline:none;font-size:13px;">
+                                    <option value="" style="color:black;">Todos los estados</option>
+                                    <option value="Pendiente" style="color:black;">Pendiente</option>
+                                    <option value="Aprobado" style="color:black;">Aprobado</option>
+                                    <option value="Rechazado" style="color:black;">Rechazado</option>
+                                </select>
+                            </div>
+                            <div class="input-group liquid-glass" style="margin-bottom:0;padding:8px 12px;border-radius:8px;">
+                                <select id="filtro-metodo" style="background:transparent;color:white;border:none;width:100%;outline:none;font-size:13px;">
+                                    <option value="" style="color:black;">Todos los métodos</option>
+                                    <option value="Efectivo USD" style="color:black;">Efectivo USD</option>
+                                    <option value="Binance" style="color:black;">Binance</option>
+                                    <option value="Zelle" style="color:black;">Zelle</option>
+                                    <option value="Transferencia VES" style="color:black;">Transferencia VES</option>
+                                    <option value="Transferencia USD" style="color:black;">Transferencia USD</option>
+                                </select>
+                            </div>
+                            <div class="input-group liquid-glass" style="margin-bottom:0;padding:8px 12px;border-radius:8px;">
+                                <input type="date" id="filtro-fecha" style="font-size:13px;color-scheme:dark;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card liquid-glass">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Cliente (RIF)</th>
+                                        <th>Factura(s)</th>
+                                        <th>Tipo</th>
+                                        <th>Concepto</th>
+                                        <th>Monto</th>
+                                        <th>Método</th>
+                                        <th>Referencia</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                        <th>Procesado por</th>
+                                        <th>Fecha proc.</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-payments-tbody">
+                                    <tr><td colspan="12" style="text-align:center;color:rgba(255,255,255,0.4);padding:20px;">Cargando pagos...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════
+                     TAB 5: CARTERA (carga de Excel + mantenimiento)
+                ════════════════════════════════════════════════════ -->
+                <div id="admin-tab-cartera" class="admin-tab-content hidden" style="width:100%;">
+
+                    <div class="card liquid-glass" style="margin-bottom:15px;border-color:#8b5cf6;">
+                        <h3 style="margin:0 0 15px;color:#8b5cf6;font-size:15px;"><i data-lucide="book-open"></i> Importar Directorio (Socio del Negocio → RIF)</h3>
+                        <div style="display:flex;gap:15px;align-items:flex-end;flex-wrap:wrap;">
+                            <div style="flex:1;min-width:200px;">
+                                <label style="font-size:11px;color:rgba(255,255,255,0.5);display:block;margin-bottom:6px;">ARCHIVO EXCEL (.xlsx)</label>
+                                <input type="file" id="directorio-file" accept=".xlsx,.xls"
+                                       style="color:white;width:100%;padding:8px;border-radius:8px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);">
+                            </div>
+                            <button onclick="importarDirectorio()" class="btn-solid"
+                                    style="width:auto;background:#8b5cf6;color:black;padding:10px 18px;">
+                                <i data-lucide="book-open"></i> Importar Directorio
+                            </button>
+                        </div>
+                        <p style="font-size:12px;color:rgba(255,255,255,0.4);margin:12px 0 0;">
+                            Columnas: <strong>Nombre</strong> · <strong>Código (RIF)</strong> · <strong>Agente de Retención</strong> (opcional)<br>
+                            Con cada fila se crea un usuario con <strong>usuario = RIF</strong> y <strong>contraseña = RIF</strong>.<br>
+                            Debe importarse <strong>antes</strong> de cargar la cartera.
+                        </p>
+                    </div>
+
+                    <div class="card liquid-glass" style="margin-bottom:15px;border-color:#3b82f6;">
+                        <h3 style="margin:0 0 15px;color:#3b82f6;font-size:15px;"><i data-lucide="upload-cloud"></i> Importar Cartera desde Excel</h3>
+                        <div style="display:flex;gap:15px;align-items:flex-end;flex-wrap:wrap;">
+                            <div style="flex:1;min-width:200px;">
+                                <label style="font-size:11px;color:rgba(255,255,255,0.5);display:block;margin-bottom:6px;">ARCHIVO EXCEL (.xlsx)</label>
+                                <input type="file" id="excel-file" accept=".xlsx,.xls"
+                                       style="color:white;width:100%;padding:8px;border-radius:8px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);">
+                            </div>
+                            <button onclick="importarExcelCartera()" class="btn-solid"
+                                    style="width:auto;background:#3b82f6;color:black;padding:10px 18px;">
+                                <i data-lucide="upload-cloud"></i> Subir a Supabase
+                            </button>
+                            <button onclick="archivarOrdenesLiquidadas()" class="btn-outline"
+                                    style="width:auto;color:#eab308;border-color:#eab308;padding:10px 18px;">
+                                <i data-lucide="archive"></i> Archivar $0
+                            </button>
+                        </div>
+                        <p style="font-size:12px;color:rgba(255,255,255,0.4);margin:12px 0 0;">
+                            Columnas requeridas: <strong>Socio del Negocio</strong> · <strong>N.º Factura</strong> · <strong>Gran Total</strong> · <strong>Fecha Venc.</strong><br>
+                            * El RIF se obtiene del Directorio (debe importarse primero).<br>
+                            * Facturas con letras en el número se tratan como <strong>Ajustes</strong> (no generan IVA).
+                        </p>
+                    </div>
+
+                    <div class="card liquid-glass" style="margin-bottom:15px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                            <h3 style="margin:0;font-size:15px;">Exportar Cartera Actual</h3>
+                            <button onclick="exportCarteraExcel()" class="btn-outline"
+                                    style="width:auto;padding:8px 16px;font-size:13px;">
+                                <i data-lucide="download"></i> Descargar Excel
+                            </button>
+                        </div>
+                        <!-- Aging legacy: IDs mantenidos -->
+                        <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                            <div style="flex:1;min-width:120px;background:rgba(74,222,128,0.08);border:1px solid #22c55e40;padding:15px;border-radius:10px;text-align:center;">
+                                <span style="font-size:11px;color:#22c55e;display:block;margin-bottom:4px;">VIGENTE</span>
+                                <strong id="aging-0" class="font-serif" style="font-size:20px;">$0.00</strong>
+                            </div>
+                            <div style="flex:1;min-width:120px;background:rgba(251,191,36,0.08);border:1px solid #eab30840;padding:15px;border-radius:10px;text-align:center;">
+                                <span style="font-size:11px;color:#eab308;display:block;margin-bottom:4px;">1–30 DÍAS VENCIDA</span>
+                                <strong id="aging-30" class="font-serif" style="font-size:20px;">$0.00</strong>
+                            </div>
+                            <div style="flex:1;min-width:120px;background:rgba(248,113,113,0.08);border:1px solid #ef444440;padding:15px;border-radius:10px;text-align:center;">
+                                <span style="font-size:11px;color:#ef4444;display:block;margin-bottom:4px;">+31 DÍAS (CRÍTICO)</span>
+                                <strong id="aging-60" class="font-serif" style="font-size:20px;">$0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════
+                     TAB 6: USUARIOS
+                ════════════════════════════════════════════════════ -->
+                <div id="admin-tab-usuarios" class="admin-tab-content hidden" style="width:100%;">
+                    <!-- Acciones superiores -->
+                    <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;align-items:center;">
+                        <button class="btn-solid" onclick="abrirModalUsuario()"
+                                style="width:auto;background:#22c55e;color:black;padding:9px 18px;font-size:13px;">
+                            <i data-lucide="plus"></i> Nueva Empresa
+                        </button>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="file" id="excel-usuarios-file" accept=".xlsx,.xls"
+                                   style="font-size:12px;color:white;max-width:200px;padding:5px;
+                                          background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);
+                                          border-radius:7px;">
+                            <button class="btn-outline" onclick="importarExcelUsuarios()"
+                                    style="width:auto;padding:8px 14px;font-size:13px;">
+                                <i data-lucide="upload"></i> Importar Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card liquid-glass">
+                        <h3 style="margin:0 0 15px;font-size:15px;">Clientes / Empresas Registradas</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>RIF</th>
+                                        <th>Nombre Empresa</th>
+                                        <th>Email</th>
+                                        <th>Teléfono</th>
+                                        <th>Agente Ret.</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════
+                     TAB 7: RETENCIONES (admin)
+                ════════════════════════════════════════════════════ -->
+                <div id="admin-tab-retenciones-admin" class="admin-tab-content hidden" style="width:100%;">
+                    <div class="card liquid-glass">
+                        <h3 style="margin:0 0 15px;font-size:15px;">Comprobantes de Retención IVA</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>RIF Cliente</th>
+                                        <th>Factura</th>
+                                        <th>Monto Retenido</th>
+                                        <th>Fecha Subida</th>
+                                        <th>Estado</th>
+                                        <th>Procesado por</th>
+                                        <th>Fecha proc.</th>
+                                        <th>Observación</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-ret-tbody">
+                                    <tr><td colspan="9" style="text-align:center;color:rgba(255,255,255,0.4);padding:16px;">Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+                        <!-- ===================== PANEL CLIENTE ===================== -->
+            <section id="client-panel" class="panel hidden">
+                <h1 class="title font-serif" style="margin-bottom: 10px;">Mi Portal de Clientes</h1>
+
+                <!-- Tabs cliente -->
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <button class="btn-outline liquid-glass tab-client active" onclick="switchClientTab('estado')">
+                        <i data-lucide="file-text"></i> Estado de Cuenta
+                    </button>
+                    <button class="btn-outline liquid-glass tab-client" onclick="switchClientTab('historial')">
+                        <i data-lucide="history"></i> Historial de Pagos
+                    </button>
+                    <button class="btn-outline liquid-glass tab-client" onclick="switchClientTab('iva')">
+                        <i data-lucide="percent"></i> IVA Bs
+                    </button>
+                    <button class="btn-outline liquid-glass tab-client hidden" id="btn-tab-retenciones" onclick="switchClientTab('retenciones')">
+                        <i data-lucide="shield"></i> Comprobantes Retención
+                    </button>
+                </div>
+
+                <!-- Tab: Estado de Cuenta (Base USD) -->
+                <div id="client-tab-estado" class="client-tab-content" style="width: 100%;">
+
+                    <!-- Paz y Salvo -->
+                    <div id="paz-y-salvo" class="card liquid-glass hidden"
+                         style="text-align:center; padding:40px; margin-bottom:20px; border:1px solid #22c55e;">
+                        <i data-lucide="award" style="width:64px; height:64px; color:#22c55e; margin:0 auto 15px;"></i>
+                        <h2 class="font-serif" style="font-size:32px; margin:0;">Usted se encuentra Solvente</h2>
+                        <p style="color:rgba(255,255,255,0.6);">No presenta saldos pendientes en USD.</p>
+                        <button onclick="window.print()" class="btn-solid"
+                                style="max-width:200px; margin:20px auto 0; background:#22c55e; color:black;">
+                            <i data-lucide="printer"></i> Imprimir Constancia
+                        </button>
+                    </div>
+
+                    <!-- Contenedor facturas + formulario -->
+                    <div id="client-debt-container" class="flex-row" style="align-items: flex-start;">
+
+                        <!-- Lista de facturas -->
+                        <div class="col-60" style="display:flex; flex-direction:column; gap:15px;">
+                            <div id="invoices-container" style="width: 100%;"></div>
+                            <div class="card liquid-glass" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="color:rgba(255,255,255,0.6);">Total Seleccionado USD:</span>
+                                <span class="font-serif" style="font-size:24px; color:#22c55e;">$<span id="total-amount">0.00</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Formulario de pago USD -->
+                        <div class="card liquid-glass col-40" id="usd-payment-card">
+                            <h2 style="margin-top:0;">Reportar Pago en USD</h2>
+                            <p id="payment-error" class="error-msg hidden" style="text-align:left; margin-bottom:10px;"></p>
+                            <form id="payment-form" style="display:flex; flex-direction:column; gap:15px;">
+
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">MONTO A PAGAR (USD) *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px; background:rgba(0,0,0,0.5);">
+                                        <input type="text" id="pago-monto" placeholder="0.00" readonly
+                                               style="color:#22c55e; font-weight:bold; cursor:not-allowed;">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">MÉTODO DE PAGO USD *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px;">
+                                        <select id="pago-metodo" required
+                                                style="background:transparent; color:white; border:none; width:100%; outline:none;">
+                                            <option value="" disabled selected style="color:black;">Seleccione método...</option>
+                                            <optgroup label="USD">
+                                                <option value="Efectivo USD"       style="color:black;">Efectivo USD</option>
+                                                <option value="Binance"            style="color:black;">Binance</option>
+                                                <option value="Zelle"              style="color:black;">Zelle</option>
+                                                <option value="Transferencia USD"  style="color:black;">Transferencia USD</option>
+                                            </optgroup>
+                                            <optgroup label="VES (Bolívares)" id="pago-metodo-ves-group">
+                                                <option value="Transferencia VES"  style="color:black;">Transferencia VES</option>
+                                                <option value="Pago Móvil"         style="color:black;">Pago Móvil</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="usd-ves-notice" class="hidden" style="padding:12px 16px; background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.3); border-radius:10px; margin-bottom:0; font-size:14px; color:#eab308;">
+                                    <i data-lucide="info" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;"></i>
+                                    Consulte el monto a pagar con su ejecutivo de ventas
+                                </div>
+
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">REFERENCIA / N° COMPROBANTE *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px;">
+                                        <input type="text" id="pago-ref" placeholder="Ej: 4810294" required>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">FECHA DE EJECUCIÓN *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px;">
+                                        <input type="date" id="pago-date" required style="color-scheme:dark;">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">SOPORTE DIGITAL (FOTO/CAPTURA) *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px;">
+                                        <input type="file" id="pago-soporte" accept=".jpg,.jpeg,.png,.webp" style="font-size:14px;">
+                                    </div>
+                                    <small style="color:rgba(255,255,255,0.4); font-size:11px;">Formatos: JPG, PNG, WEBP. Máx. 5 MB.</small>
+                                </div>
+
+                                <button type="submit" id="btn-submit-payment" class="btn-solid" disabled>
+                                    Enviar Pago USD <i data-lucide="arrow-right"></i>
+                                </button>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Historial -->
+                <div id="client-tab-historial" class="client-tab-content hidden" style="width: 100%;">
+                    <div class="card liquid-glass">
+                        <h2 style="margin-top:0;">Mis Reportes Enviados</h2>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Factura(s)</th>
+                                        <th>Concepto</th>
+                                        <th>Monto</th>
+                                        <th>Método</th>
+                                        <th>Referencia</th>
+                                        <th>Estado</th>
+                                        <th>Soporte</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="client-history-tbody">
+                                    <tr>
+                                        <td colspan="8" style="text-align:center; color:rgba(255,255,255,0.4);">No ha realizado operaciones.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Comprobantes Retención -->
+                <div id="client-tab-retenciones" class="client-tab-content hidden" style="width:100%;">
+                    <div class="card liquid-glass">
+                        <h2 style="margin-top:0;display:flex;align-items:center;gap:8px;">
+                            <i data-lucide="shield" style="width:20px;height:20px;color:#c084fc;"></i>
+                            Comprobantes de Retención IVA
+                        </h2>
+                        <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:15px;">
+                            Como Agente de Retención, debe subir el comprobante por el <strong>75% del IVA</strong> retenido.
+                            El 25% restante se paga en la pestaña <strong>IVA Bs</strong>.
+                        </p>
+                        <div id="retenciones-container"></div>
+                    </div>
+                </div>
+
+                <!-- Tab: IVA Bs -->
+                <div id="client-tab-iva" class="client-tab-content hidden" style="width:100%;">
+
+                    <div id="paz-y-salvo-iva" class="card liquid-glass hidden"
+                         style="text-align:center; padding:40px; margin-bottom:20px; border:1px solid #eab308;">
+                        <i data-lucide="check-circle" style="width:64px; height:64px; color:#22c55e; margin:0 auto 15px;"></i>
+                        <h2 class="font-serif" style="font-size:32px; margin:0;">Sin IVA Pendiente</h2>
+                        <p style="color:rgba(255,255,255,0.6);">No tiene IVA pendiente por pagar en este momento.</p>
+                    </div>
+
+                    <div id="iva-debt-container" style="width:100%;">
+                        <div id="iva-invoices-container" style="width:100%; display:flex; flex-direction:column; gap:15px;"></div>
+
+                        <div class="card liquid-glass" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                            <span style="color:rgba(255,255,255,0.6);">Total IVA Seleccionado:</span>
+                            <span class="font-serif" style="font-size:24px; color:#eab308;">Bs <span id="iva-total-amount">0.00</span></span>
+                        </div>
+
+                        <div class="card liquid-glass" style="margin-top:15px;">
+                            <h2 style="margin-top:0;">Reportar Pago de IVA (Bs)</h2>
+                            <p id="iva-payment-error" class="error-msg hidden" style="text-align:left; margin-bottom:10px;"></p>
+                            <div id="iva-bs-notice" class="hidden" style="padding:12px 16px; background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.3); border-radius:10px; margin-bottom:15px; font-size:14px; color:#eab308;">
+                                <i data-lucide="info" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;"></i>
+                                Consulte el monto a pagar con su asesor asignado
+                            </div>
+                            <div id="iva-agente-notice" class="hidden" style="padding:12px 16px; background:rgba(192,132,252,0.1); border:1px solid rgba(192,132,252,0.3); border-radius:10px; margin-bottom:15px; font-size:14px; color:#c084fc;">
+                                <i data-lucide="info" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;"></i>
+                                Usted es <strong>Agente de Retención</strong> — paga el <strong>25% del IVA</strong>.
+                                El 75% restante debe reportarlo en <strong>Comprobantes Retención</strong>.
+                            </div>
+                            <form id="iva-payment-form" style="display:flex; flex-direction:column; gap:15px;">
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">MONTO A PAGAR (Bs) *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px; background:rgba(0,0,0,0.5);">
+                                        <input type="text" id="iva-pago-monto" placeholder="0.00" readonly
+                                               style="color:#eab308; font-weight:bold; cursor:not-allowed;">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">MÉTODO DE PAGO *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px;">
+                                        <select id="iva-pago-metodo" required
+                                                style="background:transparent; color:white; border:none; width:100%; outline:none;">
+                                            <option value="" disabled selected style="color:black;">Seleccione método...</option>
+                                            <option value="Transferencia VES" style="color:black;">Transferencia VES</option>
+                                            <option value="Pago Móvil" style="color:black;">Pago Móvil</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">REFERENCIA / N° COMPROBANTE *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px;">
+                                        <input type="text" id="iva-pago-ref" placeholder="Ej: 4810294" required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">FECHA DE EJECUCIÓN *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px;">
+                                        <input type="date" id="iva-pago-date" required style="color-scheme:dark;">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.6);">SOPORTE DIGITAL (FOTO/CAPTURA) *</label>
+                                    <div class="input-group liquid-glass" style="margin-bottom:0; padding:12px; border-radius:12px;">
+                                        <input type="file" id="iva-pago-soporte" accept=".jpg,.jpeg,.png,.webp" style="font-size:14px;">
+                                    </div>
+                                    <small style="color:rgba(255,255,255,0.4); font-size:11px;">Formatos: JPG, PNG, WEBP. Máx. 5 MB.</small>
+                                </div>
+                                <button type="submit" id="btn-submit-iva-payment" class="btn-solid" disabled
+                                        style="background:#eab308; color:black;">
+                                    Enviar Pago IVA <i data-lucide="arrow-right"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ===================== PANTALLA DE ÉXITO ===================== -->
+            <section id="success-section" class="panel hidden">
+                <div class="card liquid-glass" style="text-align:center; padding:50px;">
+                    <i data-lucide="check-circle-2" style="width:64px; height:64px; color:#22c55e; margin:0 auto 20px;"></i>
+                    <h1 class="title font-serif" style="margin-bottom:10px;">¡Comprobante Registrado!</h1>
+                    <p style="color:rgba(255,255,255,0.6);">La información ha sido enviada exitosamente a nuestra base de datos en Supabase.</p>
+                    <button id="btn-restart" class="btn-outline liquid-glass" style="margin:30px auto 0;">
+                        Volver al Estado de Cuenta
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ===================== MODAL USUARIO (crear / editar) ===================== -->
+    <div id="modal-usuario"
+         style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);
+                z-index:9998;display:none;align-items:center;justify-content:center;padding:20px;">
+        <div class="card liquid-glass" style="width:100%;max-width:480px;position:relative;max-height:90vh;overflow-y:auto;">
+            <button onclick="cerrarModalUsuario()"
+                    style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.1);
+                           border:none;color:white;width:28px;height:28px;border-radius:50%;
+                           cursor:pointer;font-size:16px;line-height:28px;text-align:center;">✕</button>
+            <h3 id="modal-usuario-titulo" style="margin:0 0 20px;font-size:17px;">Nueva Empresa</h3>
+            <p id="mu-error" class="error-msg hidden" style="margin-bottom:12px;"></p>
+            <form id="form-modal-usuario" style="display:flex;flex-direction:column;gap:12px;">
+                <div>
+                    <label style="font-size:11px;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">RIF *</label>
+                    <div class="input-group liquid-glass" style="margin-bottom:0;padding:10px 14px;border-radius:9px;">
+                        <input type="text" id="mu-rif" placeholder="J-12345678" required style="font-family:monospace;">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:11px;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Nombre Empresa</label>
+                    <div class="input-group liquid-glass" style="margin-bottom:0;padding:10px 14px;border-radius:9px;">
+                        <input type="text" id="mu-nombre" placeholder="Empresa S.A.">
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div>
+                        <label style="font-size:11px;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Email</label>
+                        <div class="input-group liquid-glass" style="margin-bottom:0;padding:10px 14px;border-radius:9px;">
+                            <input type="email" id="mu-email" placeholder="correo@empresa.com">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Teléfono</label>
+                        <div class="input-group liquid-glass" style="margin-bottom:0;padding:10px 14px;border-radius:9px;">
+                            <input type="tel" id="mu-telefono" placeholder="+58 424...">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:11px;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Contraseña <span style="color:rgba(255,255,255,0.3);">(dejar en blanco para no cambiar)</span></label>
+                    <div class="input-group liquid-glass" style="margin-bottom:0;padding:10px 14px;border-radius:9px;">
+                        <input type="password" id="mu-password" placeholder="Mínimo 4 caracteres">
+                    </div>
+                </div>
+                <div style="display:flex;gap:20px;padding:4px 0;flex-wrap:wrap;">
+                    <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;">
+                        <input type="checkbox" id="mu-activo" checked style="width:auto;">
+                        Activo
+                    </label>
+                    <label style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;">
+                        <input type="checkbox" id="mu-agente" style="width:auto;">
+                        Agente de Retención
+                    </label>
+                </div>
+                <button type="submit" class="btn-solid"
+                        style="background:#22c55e;color:black;font-weight:bold;padding:12px;margin-top:4px;">
+                    Guardar Empresa
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL SOPORTE ===================== -->
+    <div id="modal-soporte"
+         style="position:fixed; top:0; left:0; width:100%; height:100%;
+                background:rgba(0,0,0,0.88); backdrop-filter:blur(6px);
+                z-index:9999; display:none; align-items:center;
+                justify-content:center; flex-direction:column;">
+        <div style="position:relative; max-width:90vw; max-height:78vh;
+                    overflow:hidden; border-radius:12px; box-shadow:0 0 40px rgba(0,0,0,0.8);">
+            <img id="img-soporte" src="" alt="Comprobante de pago"
+                 style="max-width:100%; max-height:78vh; object-fit:contain;
+                        background:#000; display:block; border-radius:12px;">
+        </div>
+        <button id="close-modal-soporte" class="btn-solid"
+                onclick="cerrarModalSoporte()"
+                style="margin-top:18px; width:auto; padding: 10px 30px;
+                       background:#ef4444; color:black; font-weight:bold;">
+            ✕ Cerrar Visualizador
+        </button>
+        <p style="margin-top:8px; font-size:12px; color:rgba(255,255,255,0.4);">
+            También puedes hacer clic fuera de la imagen para cerrar
+        </p>
+    </div>
+
+    <!-- ── BARRA INFERIOR MÓVIL (visible solo en ≤768px) ─────── -->
+    <div id="mobile-pay-bar">
+        <div class="bar-total-wrap">
+            <span class="bar-label">Total seleccionado</span>
+            <span class="bar-amount" id="mobile-bar-amount">$<span id="mobile-total-mirror">0.00</span></span>
+        </div>
+        <button class="bar-btn" id="mobile-pay-btn" disabled>
+            Continuar pago →
+        </button>
+    </div>
+
+    <script>
+    (function() {
+        var mirrorEl = document.getElementById('mobile-total-mirror');
+        var barBtn   = document.getElementById('mobile-pay-btn');
+        var barAmount = document.getElementById('mobile-bar-amount');
+
+        function getActiveTotalEl() {
+            var clientPanel = document.getElementById('client-panel');
+            if (!clientPanel || clientPanel.classList.contains('hidden')) return null;
+            if (!document.getElementById('client-tab-estado').classList.contains('hidden')) {
+                return document.getElementById('total-amount');
+            }
+            if (!document.getElementById('client-tab-iva').classList.contains('hidden')) {
+                return document.getElementById('iva-total-amount');
+            }
+            return null;
+        }
+
+        function getActiveForm() {
+            if (!document.getElementById('client-tab-estado').classList.contains('hidden')) {
+                return document.getElementById('payment-form');
+            }
+            if (!document.getElementById('client-tab-iva').classList.contains('hidden')) {
+                return document.getElementById('iva-payment-form');
+            }
+            return null;
+        }
+
+        function syncBar() {
+            if (!mirrorEl || !barBtn) return;
+            var totalEl = getActiveTotalEl();
+            var val = totalEl ? totalEl.textContent.trim() : '0.00';
+            mirrorEl.textContent = val;
+
+            var isIva = !document.getElementById('client-tab-iva').classList.contains('hidden');
+            barAmount.innerHTML = (isIva ? 'Bs ' : '$ ') + '<span id="mobile-total-mirror">' + val + '</span>';
+
+            var num = parseFloat(val.replace(/[^0-9.-]/g, '')) || 0;
+            var isVisible = window.innerWidth <= 768 && totalEl !== null;
+            if (isVisible && num > 0) {
+                document.body.classList.add('bar-visible');
+                barBtn.disabled = false;
+            } else {
+                document.body.classList.remove('bar-visible');
+                barBtn.disabled = true;
+            }
+        }
+
+        var observer = new MutationObserver(syncBar);
+        document.addEventListener('DOMContentLoaded', function() {
+            var t1 = document.getElementById('total-amount');
+            var t2 = document.getElementById('iva-total-amount');
+            if (t1) observer.observe(t1, { childList: true, subtree: true, characterData: true });
+            if (t2) observer.observe(t2, { childList: true, subtree: true, characterData: true });
+            syncBar();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn = document.getElementById('mobile-pay-btn');
+            if (btn) btn.addEventListener('click', function() {
+                var form = getActiveForm();
+                if (!form) return;
+                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(function() {
+                    var esIva = !document.getElementById('client-tab-iva').classList.contains('hidden');
+                    var sel = document.getElementById(esIva ? 'iva-pago-metodo' : 'pago-metodo');
+                    if (sel && !sel.value) { sel.focus(); return; }
+                    var ref = document.getElementById(esIva ? 'iva-pago-ref' : 'pago-ref');
+                    if (ref && !ref.value) { ref.focus(); return; }
+                    var dt = document.getElementById(esIva ? 'iva-pago-date' : 'pago-date');
+                    if (dt && !dt.value) { dt.focus(); }
+                }, 400);
+            });
+        });
+
+        window.addEventListener('resize', syncBar);
+    })();
+    </script>
+
+
+    <!-- ── TOUR GUIADO OVERLAY ─────────────────────────────── -->
+    <div id="tour-overlay" class="hidden" style="position:fixed;inset:0;z-index:99999;">
+        <div id="tour-backdrop" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1;"></div>
+        <div id="tour-highlight" style="position:fixed;z-index:2;pointer-events:none;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);transition:all 0.35s ease;border:2px solid #3b82f6;"></div>
+        <div id="tour-tooltip" style="position:fixed;z-index:3;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px 24px;max-width:400px;width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span id="tour-counter" style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;">Paso 1/1</span>
+                <button id="tour-skip-btn" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:13px;padding:4px 8px;border-radius:6px;">Saltar ✕</button>
+            </div>
+            <h3 id="tour-title" style="margin:0 0 6px;font-size:17px;font-weight:600;color:white;"></h3>
+            <p id="tour-text" style="margin:0 0 16px;font-size:14px;color:rgba(255,255,255,0.8);line-height:1.5;"></p>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span id="tour-progress" style="font-size:12px;color:rgba(255,255,255,0.3);"></span>
+                <button id="tour-next-btn" style="background:#3b82f6;color:white;border:none;border-radius:8px;padding:10px 24px;font-weight:600;font-size:14px;cursor:pointer;">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- app.js siempre al final, después de todos los CDN y Config.js -->
+    <script src="Config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

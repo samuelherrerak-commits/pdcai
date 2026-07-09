@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Usuario — Portal de Cobranzas</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Inter', sans-serif;
+        color: #111;
+        background: #fff;
+        line-height: 1.7;
+        font-size: 14px;
+    }
+    .page { max-width: 900px; margin: 0 auto; padding: 40px 50px; }
+    h1, h2, h3, h4 { font-weight: 700; line-height: 1.3; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 22px; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #3b82f6; }
+    h3 { font-size: 17px; margin: 28px 0 10px; color: #1e40af; }
+    h4 { font-size: 15px; margin: 20px 0 8px; }
+    p  { margin: 0 0 12px; }
+    ul, ol { margin: 0 0 14px 24px; }
+    li { margin-bottom: 6px; }
+    a  { color: #3b82f6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+    th { background: #f1f5f9; font-weight: 600; }
+    tr:nth-child(even) { background: #fafafa; }
+    strong { font-weight: 600; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    .cover {
+        text-align: center;
+        padding: 80px 40px 60px;
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+        color: #fff;
+        border-radius: 0 0 24px 24px;
+        margin-bottom: 40px;
+    }
+    .cover h1 { font-size: 36px; font-weight: 800; margin-bottom: 12px; }
+    .cover p  { font-size: 18px; opacity: .8; margin: 0; }
+    .cover .version { font-size: 13px; opacity: .5; margin-top: 24px; }
+    .toc { margin: 32px 0 48px; }
+    .toc h2 { border: none; margin: 0 0 16px; }
+    .toc ul { list-style: none; margin: 0; }
+    .toc li { margin-bottom: 8px; font-size: 15px; }
+    .toc a { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
+    .toc a:hover { background: #eef2ff; border-color: #3b82f6; }
+    .toc .num { font-weight: 600; color: #3b82f6; margin-right: 8px; }
+    .toc .pages { font-size: 12px; color: #94a3b8; }
+    .page-break { page-break-before: always; }
+    .note {
+        background: #f0fdf4;
+        border-left: 4px solid #22c55e;
+        padding: 14px 18px;
+        border-radius: 8px;
+        margin: 16px 0;
+        font-size: 13px;
+    }
+    .warning {
+        background: #fefce8;
+        border-left: 4px solid #eab308;
+        padding: 14px 18px;
+        border-radius: 8px;
+        margin: 16px 0;
+        font-size: 13px;
+    }
+    .tip {
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 14px 18px;
+        border-radius: 8px;
+        margin: 16px 0;
+        font-size: 13px;
+    }
+    .step { margin: 8px 0 8px 24px; }
+    .step b { color: #1e40af; }
+    img { max-width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; margin: 12px 0; }
+    @media print {
+        .cover { border-radius: 0; margin: 0; padding: 60px 40px; }
+        .page { padding: 20px 30px; }
+        h2 { page-break-before: auto; }
+        .page-break { page-break-before: always; }
+    }
+    @media (max-width: 768px) {
+        .page { padding: 20px 16px; }
+        .cover { padding: 40px 20px; }
+        .cover h1 { font-size: 24px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="cover">
+    <h1>Portal de Cobranzas</h1>
+    <p>Manual de Usuario</p>
+    <p style="font-size:14px;opacity:.65;margin-top:6px;">Administración y Portal del Cliente</p>
+    <div class="version">Versión 1.0 — Julio 2026</div>
+</div>
+
+<div class="page">
+
+    <!-- ── TABLA DE CONTENIDO ──────────────────────────── -->
+    <div class="toc">
+        <h2>Índice</h2>
+        <ul>
+            <li><a href="#cap1"><span><span class="num">1</span> Introducción</span><span class="pages">3</span></a></li>
+            <li><a href="#cap2"><span><span class="num">2</span> Panel de Administración</span><span class="pages">4</span></a></li>
+            <li><a href="#cap3"><span><span class="num">3</span> Portal del Cliente</span><span class="pages">8</span></a></li>
+            <li><a href="#cap4"><span><span class="num">4</span> Preguntas Frecuentes (FAQ)</span><span class="pages">11</span></a></li>
+            <li><a href="#cap5"><span><span class="num">5</span> Soporte Técnico</span><span class="pages">12</span></a></li>
+        </ul>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <h2 id="cap1">1 Introducción</h2>
+    <!-- ════════════════════════════════════════════════════ -->
+
+    <p>El <strong>Portal de Cobranzas</strong> es una herramienta web diseñada para gestionar la cartera de facturas, pagos y retenciones de IVA. Permite a los administradores importar facturas desde Excel, supervisar pagos en tiempo real y archivar facturas liquidadas; y a los clientes consultar su estado de cuenta, realizar pagos, y subir comprobantes de retención.</p>
+
+    <h3>1.1 Requisitos del Sistema</h3>
+    <ul>
+        <li>Navegador web moderno: Chrome 90+, Firefox 90+, Edge 90+.</li>
+        <li>Conexión a Internet estable.</li>
+        <li>Archivos Excel en formato <code>.xlsx</code> o <code>.xls</code>.</li>
+    </ul>
+
+    <h3>1.2 Acceso al Sistema</h3>
+    <p>El portal se despliega en una URL proporcionada por el administrador del sistema. No requiere instalación ni descarga de software.</p>
+
+    <div class="note"><strong>Nota:</strong> El sistema es 100% web. No se almacena información en el navegador más allá de preferencias de sesión.</div>
+
+    <div class="page-break"></div>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <h2 id="cap2">2 Panel de Administración</h2>
+    <!-- ════════════════════════════════════════════════════ -->
+
+    <p>El Panel de Administración es el centro de control del sistema. Se accede iniciando sesión con un usuario con rol de <strong>administrador</strong>.</p>
+
+    <h3>2.1 Inicio de Sesión</h3>
+    <ol>
+        <li>Abra la URL del portal en su navegador.</li>
+        <li>Ingrese su <strong>RIF</strong> como usuario y contraseña.</li>
+        <li>Haga clic en <strong>"Ingresar"</strong>.</li>
+    </ol>
+
+    <h3>2.2 Dashboard</h3>
+    <p>Al ingresar verá un resumen con las siguientes métricas:</p>
+    <ul>
+        <li><strong>Cobros del Mes:</strong> Total en USD cobrado en el mes actual.</li>
+        <li><strong>Facturas Pendientes:</strong> Cantidad de facturas con saldo mayor a cero.</li>
+        <li><strong>Facturas Vencidas:</strong> Facturas cuya fecha de vencimiento ya pasó.</li>
+        <li><strong>Próximas a Vencer:</strong> Facturas que vencen en los próximos 7 días.</li>
+    </ul>
+
+    <h3>2.3 Alertas</h3>
+    <p>La sección de Alertas muestra tres categorías:</p>
+    <ul>
+        <li><strong>Facturas Vencidas:</strong> Listado completo de facturas cuya fecha de vencimiento ya expiró.</li>
+        <li><strong>Próximas a Vencer:</strong> Facturas que vencen en los próximos 7 días.</li>
+        <li><strong>Pagos Parciales:</strong> Facturas con abonos registrados pero saldo pendiente.</li>
+    </ul>
+
+    <div class="tip"><strong>Consejo:</strong> Las alertas se actualizan automáticamente al cambiar de pestaña. Úselas para priorizar la gestión de cobranza.</div>
+
+    <h3>2.4 Buscador de Clientes</h3>
+    <p>Ingrese el <strong>RIF</strong> de un cliente para consultar su perfil y deuda detallada. El sistema muestra:</p>
+    <ul>
+        <li>Nombre del cliente y agente comercial.</li>
+        <li>Lista de todas sus facturas con montos, vencimientos y saldos.</li>
+        <li>Agente de Retención (si aplica).</li>
+        <li>Historial de pagos del cliente.</li>
+    </ul>
+
+    <h3>2.5 Gestión de Pagos</h3>
+    <p>En esta sección se listan todos los pagos registrados por los clientes. Cada pago incluye:</p>
+    <ul>
+        <li>Cliente, factura, monto y método de pago.</li>
+        <li>Referencia, fecha y comprobante adjunto (si aplica).</li>
+        <li>Estado actual: <strong>Pendiente</strong>, <strong>Aprobado</strong> o <strong>Rechazado</strong>.</li>
+    </ul>
+
+    <h4>2.5.1 Aprobar o Rechazar un Pago</h4>
+    <ol>
+        <li>Localice el pago en la tabla.</li>
+        <li>Haga clic en <strong>✓</strong> (aprobar) o <strong>✕</strong> (rechazar).</li>
+        <li>Si rechaza, opcionalmente ingrese un motivo en la ventana emergente.</li>
+        <li>El sistema actualizará automáticamente el saldo de la factura y registrará la acción.</li>
+    </ol>
+
+    <div class="warning"><strong>Importante:</strong> Al aprobar un pago, el sistema descuenta el monto del saldo de la factura. Al rechazarlo, el saldo permanece intacto. Cada acción queda registrada con su responsable y fecha.</div>
+
+    <h4>2.5.2 Filtros de Búsqueda</h4>
+    <p>Use el campo de búsqueda para filtrar pagos por RIF de cliente. También puede ver todos los pagos (hasta 500 registros) con paginación automática.</p>
+
+    <h3>2.6 Cartera (Importar Facturas)</h3>
+    <p>Esta sección permite importar la cartera de facturas desde un archivo Excel. El formato esperado es:</p>
+
+    <table>
+        <tr><th>Socio del Negocio</th><th>Moneda</th><th>Factura</th><th>Gran Total</th><th>Abierto USD</th><th>F. Vencimiento</th></tr>
+        <tr><td>J-XXXXXXXX-X</td><td>USD</td><td>FAC-001</td><td>500.00</td><td>580.00</td><td>2026-08-15</td></tr>
+    </table>
+
+    <h4>2.6.1 Cómo Importar</h4>
+    <ol>
+        <li>Haga clic en <strong>"Importar Cartera"</strong>.</li>
+        <li>Seleccione el archivo Excel con el formato correcto.</li>
+        <li>El sistema procesará el archivo: creará clientes nuevos si es necesario e insertará o actualizará las facturas.</li>
+        <li>Al finalizar, verá un resumen con la cantidad de facturas importadas.</li>
+    </ol>
+
+    <div class="note"><strong>Nota:</strong> Si un RIF no existe en la base de datos, el sistema lo crea automáticamente con los datos disponibles. Las facturas existentes se actualizan si el número de factura ya está registrado.</div>
+
+    <h3>2.7 Archivar Facturas Liquidadas</h3>
+    <p>Esta función permite archivar (eliminar) facturas completamente liquidadas (saldo ≤ 0) cuyo <strong>último pago tenga más de 6 meses</strong>.</p>
+
+    <h4>2.7.1 Proceso de Archivado</h4>
+    <ol>
+        <li>Haga clic en <strong>"Archivar Liquidadas"</strong>.</li>
+        <li>El sistema genera automáticamente un respaldo en Excel con las facturas y pagos a eliminar.</li>
+        <li>Se descarga el archivo de respaldo.</li>
+        <li>Confirme la operación en la ventana emergente.</li>
+        <li>Una vez confirmado, el sistema elimina las facturas y pagos asociados de la base de datos.</li>
+    </ol>
+
+    <div class="warning"><strong>Precaución:</strong> Asegúrese de guardar el archivo de respaldo antes de confirmar. Una vez eliminados, los datos no se pueden recuperar desde el portal.</div>
+
+    <h3>2.8 Usuarios (Directorio)</h3>
+    <p>Gestiona los usuarios del sistema. Puede:</p>
+    <ul>
+        <li><strong>Importar Directorio:</strong> Carga un Excel con la lista de clientes.</li>
+        <li><strong>Aprobar/Rechazar</strong> usuarios nuevos.</li>
+        <li><strong>Editar</strong> nombre del cliente.</li>
+        <li><strong>Marcar como Agente de Retención</strong> para que el cliente pueda subir comprobantes de retención.</li>
+    </ul>
+
+    <p>Formato del Excel de directorio:</p>
+    <table>
+        <tr><th>Agente Comercial</th><th>Código (RIF)</th><th>Nombre</th><th>Agente de Retención (opcional)</th></tr>
+        <tr><td>Juan Pérez</td><td>J-XXXXXXXX-X</td><td>Empresa ABC</td><td>Sí</td></tr>
+    </table>
+
+    <h3>2.9 Retenciones</h3>
+    <p>Lista los comprobantes de retención de IVA subidos por los clientes. El administrador puede:</p>
+    <ul>
+        <li>Ver el detalle de cada comprobante (monto, archivo, fecha).</li>
+        <li><strong>Aprobar</strong> el comprobante: el sistema descuenta el 75% del IVA correspondiente.</li>
+        <li><strong>Rechazar</strong> el comprobante, opcionalmente con una observación.</li>
+    </ul>
+
+    <h3>2.10 Traza de Auditoría</h3>
+    <p>Todas las acciones de aprobación y rechazo (pagos y retenciones) quedan registradas con:</p>
+    <ul>
+        <li><strong>Procesado por:</strong> RIF del administrador que ejecutó la acción.</li>
+        <li><strong>Fecha de procesado:</strong> Fecha y hora exacta de la acción.</li>
+        <li><strong>Observación:</strong> Motivo del rechazo (si aplica).</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <h2 id="cap3">3 Portal del Cliente</h2>
+    <!-- ════════════════════════════════════════════════════ -->
+
+    <p>El Portal del Cliente permite a los usuarios consultar sus facturas pendientes, realizar pagos y gestionar retenciones de IVA.</p>
+
+    <h3>3.1 Inicio de Sesión</h3>
+    <ol>
+        <li>Abra la URL del portal en su navegador.</li>
+        <li>Ingrese su <strong>RIF</strong> tanto en usuario como en contraseña.</li>
+        <li>Haga clic en <strong>"Ingresar"</strong>.</li>
+    </ol>
+
+    <div class="note"><strong>Nota:</strong> Si es la primera vez que ingresa, su usuario debe ser aprobado por el administrador. Si ve el mensaje "en espera de aprobación", contacte a su administrador.</div>
+
+    <h3>3.2 Estado de Cuenta</h3>
+    <p>Al iniciar sesión, verá el listado de todas sus facturas pendientes por pagar. Cada factura muestra:</p>
+    <ul>
+        <li>Número de factura.</li>
+        <li>Nombre del cliente.</li>
+        <li>Monto total y saldo pendiente.</li>
+        <li>Fecha de vencimiento.</li>
+        <li>Campo para ingresar el abono que desea pagar.</li>
+    </ul>
+
+    <h4>3.2.1 Cómo Pagar una Factura</h4>
+    <ol>
+        <li>En el campo <strong>"Abono"</strong> de cada factura, escriba el monto que desea pagar.</li>
+        <li>El <strong>Total a Pagar</strong> se calcula automáticamente.</li>
+        <li>Seleccione su <strong>Método de Pago</strong>.</li>
+        <li>Ingrese el <strong>Número de Referencia</strong> de su transferencia o pago.</li>
+        <li>Seleccione la <strong>Fecha</strong> en que realizó el pago.</li>
+        <li>Opcionalmente, adjunte una foto o captura del <strong>Comprobante</strong>.</li>
+        <li>Haga clic en <strong>"Enviar Pago"</strong>.</li>
+    </ol>
+
+    <div class="warning"><strong>Importante:</strong> Si tiene alguna duda sobre el monto a pagar, consulte con su ejecutivo de ventas antes de realizar la transacción.</div>
+
+    <h3>3.3 Historial de Pagos</h3>
+    <p>Muestra todos los pagos que ha registrado, con los siguientes datos:</p>
+    <ul>
+        <li>Factura asociada y monto pagado.</li>
+        <li>Método de pago utilizado.</li>
+        <li>Referencia y fecha del pago.</li>
+        <li>Estado actual: <strong>Pendiente</strong>, <strong>Aprobado</strong> o <strong>Rechazado</strong>.</li>
+    </ul>
+
+    <div class="tip"><strong>Consejo:</strong> Si un pago aparece como "Rechazado", contacte a su administrador para conocer el motivo y realice un nuevo pago.</div>
+
+    <h3>3.4 Pago de IVA</h3>
+    <p>Esta sección le permite pagar el IVA de sus facturas. El cálculo del IVA se realiza automáticamente como <strong>Gran Total × 16 ÷ 116</strong> (monto fijo en bolívares).</p>
+
+    <h4>3.4.1 Cómo Pagar el IVA</h4>
+    <ol>
+        <li>En la pestaña <strong>"IVA"</strong>, seleccione cuánto desea pagar (completo o parcial).</li>
+        <li>Complete los datos de pago (método, referencia, fecha).</li>
+        <li>Haga clic en <strong>"Pagar IVA"</strong>.</li>
+    </ol>
+
+    <h3>3.5 Comprobantes de Retención</h3>
+    <p>Si usted está marcado como <strong>Agente de Retención</strong>, verá una pestaña adicional para subir comprobantes de retención de IVA.</p>
+
+    <h4>3.5.1 Cómo Subir un Comprobante</h4>
+    <ol>
+        <li>Seleccione la factura a la que aplica la retención.</li>
+        <li>Ingrese el monto retenido (25% del IVA de la factura).</li>
+        <li>Adjunte el archivo del comprobante (PDF, imagen).</li>
+        <li>Haga clic en <strong>"Subir Comprobante"</strong>.</li>
+    </ol>
+
+    <div class="note"><strong>Nota:</strong> El comprobante será revisado por el administrador. Una vez aprobado, se descontará automáticamente el 75% del IVA restante de su factura.</div>
+
+    <h4>3.5.2 Estado de sus Comprobantes</h4>
+    <p>En la misma sección puede ver el listado de todos sus comprobantes con su estado actual: <strong>Pendiente</strong>, <strong>Aprobado</strong> o <strong>Rechazado</strong>.</p>
+
+    <div class="page-break"></div>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <h2 id="cap4">4 Preguntas Frecuentes (FAQ)</h2>
+    <!-- ════════════════════════════════════════════════════ -->
+
+    <h3>4.1 ¿Olvidé mi contraseña?</h3>
+    <p>Su contraseña es su RIF. No es posible cambiarla desde el portal. Contacte al administrador si necesita asistencia.</p>
+
+    <h3>4.2 ¿Puedo pagar varias facturas a la vez?</h3>
+    <p>Sí. En el Estado de Cuenta, ingrese el monto que desea abonar en cada factura. El sistema sumará los montos y generará un solo pago.</p>
+
+    <h3>4.3 ¿Cuánto tiempo tarda en aprobarse un pago?</h3>
+    <p>El tiempo de aprobación depende del administrador. Una vez aprobado, el saldo de su factura se actualiza automáticamente.</p>
+
+    <h3>4.4 ¿Qué significa "Agente de Retención"?</h3>
+    <p>Un Agente de Retención es un cliente autorizado para retener el IVA de sus facturas. Debe subir un comprobante de retención por el 25% del IVA; el 75% restante se descuenta automáticamente al aprobarse el comprobante.</p>
+
+    <h3>4.5 ¿Cómo sé si un pago fue rechazado?</h3>
+    <p>Puede consultar el estado de sus pagos en la pestaña <strong>"Historial"</strong>. Si aparece como "Rechazado", contacte a su administrador para conocer el motivo.</p>
+
+    <h3>4.6 ¿Puedo eliminar un pago que envié?</h3>
+    <p>No. Una vez enviado, el pago queda registrado y debe ser procesado por el administrador. Si cometió un error, contacte al administrador para que lo rechace y usted pueda reenviarlo.</p>
+
+    <h3>4.7 ¿Qué hago si no veo mis facturas?</h3>
+    <p>Verifique que su usuario esté aprobado. Si el problema persiste, contacte al administrador para confirmar que sus facturas estén cargadas en el sistema.</p>
+
+    <h3>4.8 ¿El sistema guarda un registro de mis acciones?</h3>
+    <p>Sí. Todas las acciones de pago y retención quedan registradas con fecha, hora y responsable para efectos de auditoría.</p>
+
+    <div class="page-break"></div>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <h2 id="cap5">5 Soporte Técnico</h2>
+    <!-- ════════════════════════════════════════════════════ -->
+
+    <p>Para reportar problemas técnicos o solicitar asistencia, utilice los siguientes canales:</p>
+
+    <table>
+        <tr><th>Medio</th><th>Contacto</th></tr>
+        <tr><td>Correo electrónico</td><td><a href="mailto:soporte@example.com">soporte@example.com</a></td></tr>
+        <tr><td>Teléfono / WhatsApp</td><td>+58 412-XXX-XXXX</td></tr>
+        <tr><td>Horario de atención</td><td>Lunes a viernes, 8:00 a.m. – 5:00 p.m.</td></tr>
+    </table>
+
+    <h3>5.1 Reporte de Errores</h3>
+    <p>Al reportar un error, proporcione la siguiente información:</p>
+    <ul>
+        <li>Nombre de usuario (RIF).</li>
+        <li>Descripción detallada del problema.</li>
+        <li>Pasos para reproducir el error.</li>
+        <li>Captura de pantalla del mensaje de error (si aplica).</li>
+        <li>Navegador y versión que utiliza.</li>
+    </ul>
+
+    <h3>5.2 Sugerencias y Mejoras</h3>
+    <p>Si tiene ideas para mejorar el portal, hágalas llegar a través de los canales de soporte. Valoramos sus comentarios para seguir evolucionando la herramienta.</p>
+
+    <hr style="margin:40px 0 20px;border:none;border-top:1px solid #e2e8f0;">
+    <p style="text-align:center;color:#94a3b8;font-size:12px;">
+        Portal de Cobranzas — Manual de Usuario v1.0<br>
+        Documento generado el <script>document.write(new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }))</script>
+    </p>
+
+</div>
+
+</body>
+</html>

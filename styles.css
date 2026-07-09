@@ -1,0 +1,883 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+:root {
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #0a0a0a;
+    color: rgba(255,255,255,0.92);
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tipografía elegante */
+.font-serif {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+}
+
+/* Card corporativo moderno */
+.liquid-glass {
+    background: #141414;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    position: relative;
+    transition: border-color 0.2s;
+}
+.liquid-glass:hover {
+    border-color: rgba(255,255,255,0.12);
+}
+
+/* Estructura UI */
+.app-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Navegación */
+.navbar {
+    padding: 24px;
+}
+.nav-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    border-radius: 12px;
+    background: #141414;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.nav-brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 18px; }
+
+/* Contenido Principal */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.title { font-size: 2.25rem; font-weight: 600; margin-bottom: 24px; text-align: center; letter-spacing: -0.02em; }
+
+/* Formularios y Botones */
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+.input-group:focus-within {
+    border-color: rgba(255,255,255,0.2);
+}
+.input-group input, .input-group select {
+    background: transparent; border: none; outline: none;
+    color: white; font-size: 16px; flex: 1; width: 100%;
+}
+.input-group input::placeholder { color: rgba(255,255,255,0.4); }
+.input-group select option { color: black; }
+
+.btn-icon {
+    background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.2s;
+}
+.btn-icon:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); }
+
+.btn-solid {
+    background: #3b82f6; color: white; border: none; border-radius: 8px;
+    padding: 12px 24px; font-weight: 600; font-size: 15px;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center; gap: 10px; width: 100%;
+    transition: background 0.2s;
+}
+.btn-solid:hover { background: #2563eb; }
+.btn-solid:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-outline {
+    background: transparent; color: rgba(255,255,255,0.8);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+    padding: 10px 20px; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+}
+.btn-outline:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.3); color: white; }
+
+/* Paneles (Admin/Client) */
+.panel { width: 100%; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+.card { padding: 30px; width: 100%; box-sizing: border-box; }
+.flex-row { display: flex; gap: 20px; width: 100%; }
+.col-60 { width: 60%; } .col-40 { width: 40%; }
+
+/* Tablas */
+.table-container { overflow-x: auto; max-height: 250px; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+th { color: rgba(255,255,255,0.5); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; position: sticky; top: 0; background: #141414; }
+.text-green { color: #22c55e; }
+
+.hidden { display: none !important; }
+.error-msg { color: #ef4444; font-size: 14px; margin-top: 10px; text-align: center; }
+
+/* Footer */
+.footer { display: flex; justify-content: center; gap: 20px; padding: 40px 0; margin-top: auto; }
+.social-icon { color: rgba(255,255,255,0.5); padding: 12px; border-radius: 8px; cursor: pointer; display: flex; border: 1px solid rgba(255,255,255,0.06); transition: all 0.2s; }
+.social-icon:hover { color: white; background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
+/* ================================================================
+   PROSEIN — RESPONSIVE MOBILE v2
+   Reemplaza el responsive_mobile.css anterior.
+   Regla base: todo lo que está fuera de @media afecta a TODOS los
+   tamaños. Lo que está dentro solo al rango indicado.
+   ================================================================ */
+
+/* ── 0. BOX MODEL GLOBAL (seguro, sin colisión) ─────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── 0b. Prevent iOS font-size bump ─────────────────────────── */
+html { -webkit-text-size-adjust: 100%; }
+
+
+/* ================================================================
+   BREAKPOINT PRINCIPAL: ≤ 768 px  (tablets y móviles)
+   ================================================================ */
+@media (max-width: 768px) {
+
+    /* ── 1. LAYOUT BASE ────────────────────────────────────────── */
+    html, body {
+        width: 100%;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    .app-container {
+        width: 100%;
+        min-height: 100vh;
+        /* quitar cualquier max-width o margen lateral que dé
+           aspecto de "página dentro de página" */
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .main-content {
+        width: 100%;
+        padding: 8px 10px 90px;   /* 90px reservados para barra inferior */
+    }
+
+    .panel {
+        width: 100%;
+        padding: 12px 0;
+    }
+
+    .card {
+        padding: 14px 12px;
+        border-radius: 10px;
+    }
+
+
+    /* ── 2. NAVBAR COMPACTO ────────────────────────────────────── */
+    .navbar {
+        position: sticky;
+        top: 0;
+        z-index: 900;
+    }
+
+    .nav-inner {
+        display: flex;
+        flex-direction: row;          /* HORIZONTAL en móvil también */
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        gap: 8px;
+        border-radius: 0 !important; /* full-width sin bordes redondeados */
+    }
+
+    .nav-brand {
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 55%;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Icono del brand */
+    .nav-brand svg,
+    .nav-brand i[data-lucide] {
+        width: 16px !important;
+        height: 16px !important;
+        flex-shrink: 0;
+    }
+
+    #nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    /* Status pill */
+    #nav-status {
+        font-size: 10px;
+        padding: 4px 8px;
+        pointer-events: none;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+    /* Botón cerrar sesión: ícono solo en mobile */
+    #btn-logout {
+        font-size: 0;          /* ocultar texto */
+        padding: 8px;
+        min-width: 36px;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    #btn-logout svg,
+    #btn-logout i[data-lucide] {
+        font-size: 14px;
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+
+    /* ── 3. TÍTULO DEL PANEL CLIENTE ───────────────────────────── */
+    #client-panel > h1.title {
+        font-size: clamp(18px, 5vw, 26px);
+        line-height: 1.25;
+        word-break: break-word;
+        margin-bottom: 12px;
+        padding: 0 2px;
+    }
+
+
+    /* ── 4. TABS: SCROLL HORIZONTAL ───────────────────────────── */
+
+    /* Admin tabs */
+    #admin-panel > div:first-child {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        gap: 8px !important;
+        margin-bottom: 14px !important;
+        padding-bottom: 6px !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        scroll-snap-type: x mandatory;
+    }
+    #admin-panel > div:first-child::-webkit-scrollbar { display: none; }
+    #admin-panel > div:first-child > button {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+        min-height: 38px !important;
+        scroll-snap-align: start;
+    }
+
+    /* Client tabs */
+    #client-panel > div:nth-child(2) {     /* segundo hijo = div de tabs */
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        gap: 8px !important;
+        margin-bottom: 14px !important;
+        padding-bottom: 6px !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        scroll-snap-type: x mandatory;
+    }
+    #client-panel > div:nth-child(2)::-webkit-scrollbar { display: none; }
+    #client-panel > div:nth-child(2) > button {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+        min-height: 38px !important;
+        scroll-snap-align: start;
+    }
+
+
+    /* ── 5. FACTURAS — ACORDEÓN ────────────────────────────────── */
+
+    /* La tarjeta externa no pierde padding */
+    #invoices-container > div.card {
+        padding: 0 !important;
+        overflow: hidden;
+    }
+
+    /* Header del acordeón: mantener horizontal pero ajustado */
+    #invoices-container > div.card > div[onclick] {
+        display: flex !important;
+        flex-direction: row !important;     /* HORIZONTAL — no romper */
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 14px !important;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    /* Lado izquierdo del acordeón (texto factura + fecha) */
+    #invoices-container > div.card > div[onclick] > div:first-child h3 {
+        font-size: 15px !important;
+        margin: 0 0 3px !important;
+    }
+    #invoices-container > div.card > div[onclick] > div:first-child span {
+        font-size: 11px !important;
+    }
+
+    /* Lado derecho: saldo + ícono chevron */
+    #invoices-container > div.card > div[onclick] > div:last-child {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    #invoices-container > div.card > div[onclick] .font-serif {
+        font-size: 17px !important;
+    }
+
+    /* Cuerpo del acordeón (órdenes) */
+    #invoices-container > div.card > div:not([onclick]) {
+        padding: 0 14px 14px !important;
+    }
+
+
+    /* ── 6. ÓRDENES DENTRO DEL ACORDEÓN — CARDS ───────────────── */
+
+    /* Cada orden se convierte en una micro-card */
+    #invoices-container div[style*="margin-top: 15px"] ,
+    #invoices-container div[style*="margin-top:15px"] {
+        padding: 12px !important;
+        border-radius: 10px !important;
+        margin-top: 10px !important;
+    }
+
+    /* Nombre de la orden */
+    #invoices-container strong {
+        font-size: 12px !important;
+        margin-bottom: 8px !important;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    /* Fila checkbox + input de monto */
+    #invoices-container div[style*="display:flex"][style*="align-items:center"][style*="justify-content:space-between"],
+    #invoices-container div[style*="display: flex"][style*="align-items: center"][style*="justify-content: space-between"] {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+        padding: 10px !important;
+    }
+
+    /* Label del checkbox */
+    #invoices-container label {
+        font-size: 13px !important;
+        gap: 10px !important;
+    }
+
+    /* Checkbox más grande y táctil */
+    #invoices-container input[type="checkbox"] {
+        width: 22px !important;
+        height: 22px !important;
+        min-height: 22px !important;
+        flex-shrink: 0;
+        accent-color: #22c55e;
+        cursor: pointer;
+    }
+
+    /* Input de monto abono */
+    #invoices-container input[type="number"].concepto-monto-input {
+        width: 100% !important;
+        text-align: left !important;
+        font-size: 15px !important;
+        padding: 8px 10px !important;
+    }
+
+    /* Bloque IVA global */
+    #invoices-container div[style*="fbbf24"] {
+        padding: 12px !important;
+    }
+    #invoices-container div[style*="fbbf24"] > div[style*="display:flex"],
+    #invoices-container div[style*="fbbf24"] > div[style*="display: flex"] {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+    }
+    #invoices-container div[style*="fbbf24"] span[style*="font-size:16px"],
+    #invoices-container div[style*="fbbf24"] span[style*="font-size: 16px"] {
+        font-size: 20px !important;
+        align-self: flex-end;
+    }
+
+
+    /* ── 7. LAYOUT FACTURAS + FORMULARIO ──────────────────────── */
+
+    /* En móvil: columna única */
+    #client-debt-container.flex-row {
+        flex-direction: column !important;
+        gap: 0 !important;
+    }
+
+    /* Col-60 (acordeón) y col-40 (formulario) → 100% */
+    #client-debt-container .col-60,
+    #client-debt-container .col-40 {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Card total conciliación */
+    #client-debt-container .col-60 > div.card {
+        margin-top: 10px;
+    }
+
+    /* Formulario pago: quitar card visual en móvil, va como sección */
+    #client-debt-container .col-40.card {
+        margin-top: 10px;
+        border-radius: 12px;
+    }
+
+    /* Título del formulario */
+    #client-debt-container .col-40 h2 {
+        font-size: 15px !important;
+        margin-bottom: 12px !important;
+    }
+
+    /* Formulario: gaps más compactos */
+    #payment-form {
+        gap: 12px !important;
+    }
+
+    /* Labels */
+    #payment-form label,
+    #client-debt-container label {
+        font-size: 11px !important;
+        letter-spacing: 0.5px;
+    }
+
+    /* Inputs táctiles — evita zoom iOS */
+    #payment-form input,
+    #payment-form select,
+    #payment-form textarea {
+        font-size: 16px !important;
+        min-height: 46px;
+    }
+
+    /* Botón enviar — grande y táctil */
+    #btn-submit-payment {
+        min-height: 50px !important;
+        font-size: 15px !important;
+        border-radius: 8px !important;
+        letter-spacing: 0.5px;
+    }
+
+
+    /* ── 8. BARRA INFERIOR FIJA — TOTAL + CONTINUAR ────────────── */
+    /* Se muestra solo cuando hay selección (manejado por clase .bar-visible
+       que se agrega via JS, ver nota abajo) */
+
+    #mobile-pay-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 800;
+        background: rgba(10, 20, 35, 0.97);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(34, 197, 94, 0.25);
+        padding: 10px 16px 16px;
+        display: none;           /* oculta por defecto */
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        /* safe area para iPhone con home bar */
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        transform: translateY(100%);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Cuando JS agrega .bar-visible al body */
+    body.bar-visible #mobile-pay-bar {
+        display: flex;
+        transform: translateY(0);
+    }
+
+    #mobile-pay-bar .bar-total-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+    #mobile-pay-bar .bar-label {
+        font-size: 10px;
+        color: rgba(255,255,255,0.45);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    #mobile-pay-bar .bar-amount {
+        font-size: 22px;
+        font-weight: 700;
+        color: #22c55e;
+        font-family: 'Instrument Serif', Georgia, serif;
+        line-height: 1;
+    }
+    #mobile-pay-bar .bar-btn {
+        flex-shrink: 0;
+        background: #22c55e;
+        color: black;
+        font-weight: 700;
+        font-size: 14px;
+        border: none;
+        border-radius: 8px;
+        padding: 13px 24px;
+        cursor: pointer;
+        white-space: nowrap;
+        letter-spacing: 0.3px;
+        min-height: 48px;
+        -webkit-tap-highlight-color: transparent;
+    }
+    #mobile-pay-bar .bar-btn:active {
+        background: #22c55e;
+        transform: scale(0.97);
+    }
+    #mobile-pay-bar .bar-btn:disabled {
+        background: rgba(255,255,255,0.15);
+        color: rgba(255,255,255,0.35);
+        cursor: not-allowed;
+    }
+
+
+    /* ── 9. HISTORIAL — CARDS EN LUGAR DE TABLA ────────────────── */
+
+    #client-tab-historial .table-container {
+        overflow-x: visible;
+    }
+    #client-tab-historial table,
+    #client-tab-historial thead,
+    #client-tab-historial tbody,
+    #client-tab-historial th,
+    #client-tab-historial td,
+    #client-tab-historial tr {
+        display: block;
+        width: 100%;
+    }
+    #client-tab-historial thead { display: none; }
+    #client-tab-historial tbody tr {
+        background: #141414;
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    #client-tab-historial tbody td {
+        padding: 3px 0;
+        border: none;
+        font-size: 13px;
+        color: rgba(255,255,255,0.8);
+    }
+    /* Primera celda = fecha, hacerla más pequeña */
+    #client-tab-historial tbody td:first-child {
+        font-size: 11px;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 2px;
+    }
+    /* Monto (5a celda) destacado */
+    #client-tab-historial tbody td:nth-child(5) {
+        font-size: 20px;
+        color: #22c55e;
+        font-family: 'Instrument Serif', Georgia, serif;
+        margin: 4px 0;
+    }
+    #client-tab-historial tbody td button {
+        margin-top: 6px;
+        min-height: 36px;
+        width: 100%;
+    }
+
+
+    /* ── 10. ADMIN — TABLAS SCROLLABLES ───────────────────────── */
+
+    #admin-panel .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+    }
+    #admin-panel table {
+        min-width: 600px;   /* fuerza scroll horizontal si el contenido es ancho */
+    }
+
+
+    /* ── 11. GRID KPI: 2 columnas ──────────────────────────────── */
+    #admin-tab-dashboard > div:first-child {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* ── 12. GRÁFICOS: apilar ──────────────────────────────────── */
+    #admin-tab-dashboard > div:nth-child(2) {
+        grid-template-columns: 1fr !important;
+    }
+    #chart-dona    { max-height: 190px; }
+    #chart-barras  { max-height: 190px; }
+    #chart-top5    { max-height: 180px; }
+
+
+    /* ── 13. FLEX-ROW GENÉRICO → columna ──────────────────────── */
+    .flex-row {
+        flex-direction: column !important;
+    }
+    .col-40, .col-60 {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* ── 14. MODAL USUARIO → bottom-sheet ─────────────────────── */
+    #modal-usuario {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+    #modal-usuario > div {
+        border-radius: 20px 20px 0 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        max-height: 92vh;
+        overflow-y: auto;
+    }
+    #modal-usuario > div > form > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;  /* email y teléfono en columna */
+    }
+
+    /* ── 15. MODAL SOPORTE ─────────────────────────────────────── */
+    #modal-soporte > div:first-of-type {
+        max-width: 96vw;
+        max-height: 60vh;
+    }
+
+    /* ── 16. PANTALLA DE ÉXITO ─────────────────────────────────── */
+    #success-section .card {
+        padding: 36px 16px;
+    }
+    #success-section h1 {
+        font-size: clamp(18px, 5vw, 24px);
+    }
+
+    /* ── 17. LOGIN ──────────────────────────────────────────────── */
+    #login-section {
+        max-width: 100%;
+        padding: 20px 16px;
+    }
+    #login-section h1 {
+        font-size: clamp(20px, 6vw, 28px);
+    }
+
+    /* ── 18. LOADER ────────────────────────────────────────────── */
+    #loader-text {
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        text-align: center;
+        padding: 0 20px;
+    }
+
+    /* ── 19. COMPROBANTES RETENCIÓN CLIENTE ────────────────────── */
+    #retenciones-container > .card > div {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    #retenciones-container input[type="file"] {
+        max-width: 100% !important;
+        font-size: 13px !important;
+    }
+    #retenciones-container button {
+        min-height: 40px;
+    }
+
+    /* ── 20. IVA TAB ──────────────────────────────────────────── */
+    #iva-invoices-container > div.card {
+        padding: 0 !important;
+        overflow: hidden;
+    }
+    #iva-invoices-container > div.card > div {
+        padding: 14px !important;
+    }
+    #iva-invoices-container > div.card label {
+        font-size: 13px !important;
+        gap: 10px !important;
+    }
+    #iva-invoices-container input[type="checkbox"] {
+        width: 22px !important;
+        height: 22px !important;
+        accent-color: #eab308;
+    }
+
+    #iva-debt-container .card {
+        padding: 14px 12px;
+    }
+
+    /* ── 21. BUSCADOR CLIENTES ADMIN ───────────────────────────── */
+    #admin-tab-buscador > .card > div {
+        flex-direction: column !important;
+    }
+    #search-rif-input {
+        width: 100% !important;
+    }
+
+    /* ── 22. FICHA CLIENTE (perfil en buscador) ────────────────── */
+    #client-profile-wrap .card > div:first-child {
+        flex-direction: column !important;
+    }
+    #client-profile-wrap .card > div:first-child > div:last-child {
+        flex-direction: column !important;
+        width: 100%;
+    }
+    #client-profile-wrap .card > div:first-child > div:last-child > div {
+        width: 100%;
+        text-align: left !important;
+    }
+
+    /* ── 23. PAZ Y SALVO ───────────────────────────────────────── */
+    #paz-y-salvo {
+        padding: 30px 16px !important;
+    }
+    #paz-y-salvo h2 {
+        font-size: clamp(18px, 5vw, 26px) !important;
+    }
+
+} /* fin @media 768px */
+
+
+/* ================================================================
+   BREAKPOINT SECUNDARIO: ≤ 390 px  (iPhone SE, Galaxy S)
+   ================================================================ */
+@media (max-width: 390px) {
+
+    .nav-brand {
+        font-size: 11px;
+        max-width: 50%;
+    }
+
+    #admin-tab-dashboard > div:first-child {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+    #admin-tab-dashboard > div:first-child .card {
+        padding: 12px 8px !important;
+    }
+    #admin-tab-dashboard > div:first-child strong {
+        font-size: 18px !important;
+    }
+
+    #mobile-pay-bar .bar-amount {
+        font-size: 18px;
+    }
+    #mobile-pay-bar .bar-btn {
+        padding: 11px 16px;
+        font-size: 13px;
+    }
+
+    #invoices-container > div.card > div[onclick] {
+        padding: 12px 10px !important;
+    }
+    #invoices-container > div.card > div[onclick] .font-serif {
+        font-size: 15px !important;
+    }
+
+} /* fin @media 390px */
+
+
+/* ================================================================
+   BARRA INFERIOR: visible en cualquier ancho cuando hay selección
+   (no limitamos a móvil — en desktop es invisible igual porque
+   la sección de pago ya está visible al lado)
+   ================================================================ */
+@media (min-width: 769px) {
+    #mobile-pay-bar {
+        display: none !important;    /* nunca en desktop */
+    }
+    body.bar-visible #mobile-pay-bar {
+        display: none !important;
+    }
+}
+
+
+/* ================================================================
+   TOUR GUIADO — ONBOARDING INTERACTIVO
+   ================================================================ */
+
+#tour-overlay {
+    display: none !important;
+}
+#tour-overlay.active {
+    display: block !important;
+}
+
+#tour-skip-btn:hover {
+    background: rgba(255,255,255,0.08);
+    color: white;
+}
+
+#tour-next-btn:active {
+    transform: scale(0.97);
+}
+
+/* Animación fade-in del tooltip */
+@keyframes tourFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+#tour-tooltip {
+    animation: tourFadeIn 0.3s ease forwards;
+}
+
+/* Destello (pulse) en el elemento resaltado */
+@keyframes tourPulse {
+    0%, 100% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.55), 0 0 0 2px #3b82f6; }
+    50%      { box-shadow: 0 0 0 9999px rgba(0,0,0,0.55), 0 0 0 4px #3b82f6, 0 0 20px rgba(59,130,246,0.3); }
+}
+#tour-highlight.pulse {
+    animation: tourPulse 1.5s ease infinite;
+}
+
+/* Responsive: tooltip ocupa todo el ancho en móvil */
+@media (max-width: 768px) {
+    #tour-tooltip {
+        max-width: 94vw;
+        padding: 16px 18px;
+        left: 3vw !important;
+        right: 3vw !important;
+    }
+    #tour-highlight {
+        border-radius: 6px !important;
+    }
+}

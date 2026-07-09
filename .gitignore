@@ -1,0 +1,10 @@
+# Credenciales
+Config.js
+
+# Excel temporales
+~$*.xlsx
+*.xlsx.meta
+
+# Sistema
+.DS_Store
+Thumbs.db
