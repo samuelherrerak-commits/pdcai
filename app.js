@@ -129,6 +129,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return isNaN(standard.getTime()) ? new Date() : standard;
     }
 
+    function convertirFecha(v) {
+        if (!v) return '';
+        if (typeof v === 'number' && v > 40000) {
+            const d = new Date((v - 25569) * 86400 * 1000);
+            return d.toISOString().split('T')[0];
+        }
+        const num = String(v).match(/^\d+$/) ? parseInt(v, 10) : null;
+        if (num && num > 40000) {
+            const d = new Date((num - 25569) * 86400 * 1000);
+            return d.toISOString().split('T')[0];
+        }
+        return String(v);
+    }
+
+    function formatDateDDMMYYYY(d) {
+        if (!d || d === '-') return '-';
+        const num = typeof d === 'number' ? d : (String(d).match(/^\d+$/) ? parseInt(d, 10) : null);
+        if (num && num > 40000) {
+            const dt = new Date((num - 25569) * 86400 * 1000);
+            if (!isNaN(dt.getTime())) d = dt.toISOString().split('T')[0];
+        }
+        const dt = new Date(d);
+        if (isNaN(dt.getTime())) return String(d);
+        const dd = String(dt.getDate()).padStart(2, '0');
+        const mm = String(dt.getMonth() + 1).padStart(2, '0');
+        const yyyy = dt.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+    }
+
 
     // =========================================================
     // MÓDULO 3: SYNC DE DATOS DESDE SUPABASE
@@ -156,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
             facturasGlobal[rif][factura] = {
                 abiertoUSD:         parseFloat(row.abierto_usd) || 0,
                 ivaBs:              parseFloat(row.iva_bs) || 0,
-                fechaVencimiento:   row.fecha_vencimiento || '',
+                fechaVencimiento:   convertirFecha(row.fecha_vencimiento) || '',
                 esAjuste:           !!row.es_ajuste,
                 abiertoUSDOriginal: parseFloat(row.abierto_usd_original) || 0,
                 granTotalVES:       parseFloat(row.gran_total_ves) || 0
@@ -545,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tr>
                         <td style="font-family:monospace;">${r.rif}</td>
                         <td>${r.numFac}</td>
-                        <td style="color:rgba(255,255,255,0.7);">${r.fv}</td>
+                        <td style="color:rgba(255,255,255,0.7);">${formatDateDDMMYYYY(r.fv)}</td>
                         <td class="font-serif" style="color:#eab308;">${fmt(r.saldo)}</td>
                     </tr>`).join('');
         }
@@ -878,7 +907,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'IVA Bs':             f.ivaBs,
                     'Gran Total VES':     f.granTotalVES,
                     'Es Ajuste':          f.esAjuste ? 'Sí' : 'No',
-                    'Fecha Vencimiento':  f.fechaVencimiento || '-',
+                    'Fecha Vencimiento':  formatDateDDMMYYYY(f.fechaVencimiento) || '-',
                     'Estado':             estado
                 });
             }
@@ -1044,7 +1073,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     const facturaRaw  = String(col(raw, 'Factura', 'Documento') || '').trim();
                     const abiertoUSD  = parseFloat(String(col(raw, 'Abierto USD', 'Abierto_USD') || '0').replace(/[^0-9.\-]/g, '')) || 0;
                     const granTotal   = parseFloat(String(col(raw, 'Gran Total', 'Gran_Total') || '0').replace(/[^0-9.\-]/g, '')) || 0;
-                    const fechaVenc   = col(raw, 'F. Vencimiento', 'Fecha Vencimiento', 'Vencimiento') || null;
+                    let fechaVenc   = col(raw, 'F. Vencimiento', 'Fecha Vencimiento', 'Vencimiento') || null;
+                    if (typeof fechaVenc === 'number' && fechaVenc > 40000) {
+                        const d = new Date((fechaVenc - 25569) * 86400 * 1000);
+                        fechaVenc = d.toISOString().split('T')[0];
+                    } else if (fechaVenc instanceof Date && !isNaN(fechaVenc.getTime())) {
+                        fechaVenc = fechaVenc.toISOString().split('T')[0];
+                    }
 
                     if (!socioNombre || !facturaRaw || abiertoUSD <= 0) {
                         if (socioNombre || facturaRaw) { errores++; erroresDetalle.push(`Fila incompleta: "${socioNombre}" / "${facturaRaw}"`); }
@@ -1057,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         continue;
                     }
 
-                    const numFactura = facturaRaw.split(/\s*-\s*/)[0].trim();
+                    const numFactura = facturaRaw.split(/\s+/)[0].trim();
                     const esAjuste = /[a-zA-Z]/.test(numFactura);
 
                     let baseUSD, ivaBs;
@@ -1280,9 +1315,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let deudaTotalUSD  = 0;
         let html           = '';
 
-        for (const [numFactura, datos] of Object.entries(misFacturas)) {
+        const facturasOrdenadas = Object.entries(misFacturas)
+            .filter(([,d]) => d.abiertoUSD > 0)
+            .sort((a,b) => {
+                const fa = a[1].fechaVencimiento || '9999-12-31';
+                const fb = b[1].fechaVencimiento || '9999-12-31';
+                return fa.toString().localeCompare(fb.toString());
+            });
+        for (const [numFactura, datos] of facturasOrdenadas) {
             const saldoUSD = datos.abiertoUSD;
-            if (saldoUSD <= 0) continue;
             deudaTotalUSD += saldoUSD;
 
             const tipoTag = datos.esAjuste
@@ -1295,7 +1336,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div style="flex:1;min-width:150px;">
                             <strong style="color:#3b82f6;font-size:16px;">Factura ${numFactura}</strong>${tipoTag}
                             <span style="display:block;font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;">
-                                Vence: ${datos.fechaVencimiento || 'No especificada'}
+                                Vence: ${formatDateDDMMYYYY(datos.fechaVencimiento) || 'No especificada'}
                             </span>
                         </div>
                         <div style="text-align:right;min-width:140px;">
@@ -1427,7 +1468,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div>
                             <strong style="color:#eab308;font-size:15px;">Factura ${numFactura}</strong>
                             <span style="display:block;font-size:12px;color:rgba(255,255,255,0.5);margin-top:3px;">
-                                Vence: ${datos.fechaVencimiento || 'No especificada'}
+                                Vence: ${formatDateDDMMYYYY(datos.fechaVencimiento) || 'No especificada'}
                             </span>
                         </div>
                         <div style="display:flex;align-items:center;gap:15px;">
